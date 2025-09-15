@@ -1,6 +1,8 @@
 import os
 import numpy as np
 import pandas as pd
+import datetime as dt
+import time
 
 def check_path():
     # check for save file path, create file if path not found
@@ -26,15 +28,25 @@ def check_path():
         print("make")
     
     return _dir_path, _save_dir_path, _planner_file_path, _grader_file_path, _planner_df, _grader_df
-    
-    
 
+def check_assignment_date(_assignment_date):
+    difference = _assignment_date-dt.datetime.now()
+    hour_in_day = 24
+    day, hour = divmod(difference.days*hour_in_day + difference.seconds/3600, 24)
+    print(day, hour)
+    hour, minute = divmod(hour*60, 60)
+    print(hour, minute)
+
+    return f"{day} day/days | {hour} hour/hours | {minute:.2f} minute/minutes"
 
 if __name__ == "__main__":
 
-    dir_path, save_dir_path, planner_file_path, grader_file_path, planner_df, grader_df = check_path()
+    dir_path, save_dir_path, planner_file_path, grader_file_path, planner_df, grader_df = check_path()    
 
-    
+    test = dt.datetime.now() + dt.timedelta(days=5)
+    print(test.day)
+    time.sleep(5)
+    print(check_assignment_date(test))
 
-    print(dir_path)
+
 
