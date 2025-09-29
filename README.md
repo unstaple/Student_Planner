@@ -9,13 +9,19 @@ A Student Planner + GPA Tracker Project for Problem solving computer programming
 [python 3.10.11](https://www.python.org/downloads/release/python-31011/)
 
 ## Modules
+
+pydantic==2.11.9
+
+pydantic_core==2.33.2
+
+setuptools-scm==9.2.0
+
+```
+python.exe -m pip install -U pip
+
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib gspread  <-- this is for google sheet experiments.
 
 pip install --upgrade pydantic==2.11.9, pydantic_core==2.33.2, setuptools-scm==9.2.0
+```
 
-```
-pydantic==2.11.9
-pydantic_core==2.33.2
-setuptools-scm==9.2.0
-```
 
