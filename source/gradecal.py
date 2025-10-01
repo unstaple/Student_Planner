@@ -50,79 +50,82 @@ def get_grade_point(score):
         return (0.0, 'F')
 
 
-def calculate_gpa(course_data):
+def calculate_gpa(semester):
     """
     Calculate GPA for a semester.
     
     Args:
-        course_data (list): List of tuples (score, credit_hours)
+        semester (object): a semester object
 
     Returns:
         float: GPA value
     """
 
-    thresholds = get_default_thresholds()
+    total_grade_points = 0
+    total_credits = 0
 
-    if course_data and thresholds:
-        total_grade_points = 0
-        total_credits = 0
+    for subject in semester.subjects:
+        grade_point, _ = get_grade_point(subject.score)
+        total_grade_points += grade_point * subject.credit
+        total_credits += subject.credit
 
-        for score, credits in course_data:
-            grade_point, _ = get_grade_point(score)
-            total_grade_points += grade_point * credits
-            total_credits += credits
-
-        if total_credits == 0:
-            return 0.0
-        return total_grade_points / total_credits
-    else:
+    if total_credits == 0:
         return 0.0
 
+    return total_grade_points / total_credits
 
-def calculate_gpax(all_semesters_data):
+
+def calculate_gpax(all_semester):
     """
     Calculate cumulative GPAX across all semesters.
     
     Args:
-        all_semesters_data (list): List of semester data, each containing course_data
+        all_semester (list): List of semester, each containing semester object
     
     Returns:
         float: GPAX value
     """
-    if all_semesters_data:
+    thresholds = get_default_thresholds()
 
-        thresholds = get_default_thresholds()
+    if all_semester and thresholds:
+        total_grade_points = 0
+        total_credits = 0
 
-        if all_semesters_data and thresholds:
-            total_grade_points = 0
-            total_credits = 0
+        for semester in all_semester:
+            for subject in semester.subjects:
+                grade_point, _ = get_grade_point(subject.score)
+                total_grade_points += grade_point * subject.credit
+                total_credits += subject.credit
 
-            for semester_data in all_semesters_data:
-                for score, credits in semester_data:
-                    grade_point, _ = get_grade_point(score)
-                    total_grade_points += grade_point * credits
-                    total_credits += credits
+        if total_credits == 0:
+            return 0.0
 
-            if total_credits == 0:
-                return 0.0
-            return total_grade_points / total_credits
-    else:
-        return 0.0
+        return total_grade_points / total_credits
+
 
 if __name__ == "__main__":
+    import os
+    import json
+    from classes import Semester
+
+    save_path = os.path.dirname(os.path.realpath(__file__))
+    save_path = fr"{save_path:s}\..\Saves"
     
-    # Example: Semester 1 courses (score, credit_hours)
-    semester1 = [
-        (85, 3),  # 85% in 3-credit course
-        (78, 2),  # 78% in 2-credit course
-        (92, 4),  # 92% in 4-credit course
-    ]
+    names = [name for name in os.listdir(save_path)]
     
-    semester2 = [
-        (73, 3),
-        (68, 2),
-        (81, 4),
-    ]
+    semesters = []
+
+    for name in names:
+        with open(f"{save_path}\\{name}", "r") as f:
+            data = json.load(f)
+            loaded_semester = Semester.from_dict(data)
+            semesters.append(loaded_semester)
+
+            # Print loaded data
+            print(loaded_semester.show())
+
+    semester1 = semesters[0]
+    semester2 = semesters[1]
     
     gpa1 = calculate_gpa(semester1)
     gpa2 = calculate_gpa(semester2)

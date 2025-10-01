@@ -2,32 +2,32 @@
 
 import json
 import os
-import datetime as dt
+from datetime import datetime as dt, timedelta
 import time
-try:
-    from .classes import Semester
-except ImportError:
-    from classes import Semester
 
-
-def clear():
+def clear() -> None:
     if os.name == 'nt':       # Windows
         os.system('cls')
     else:                     # macOS / Linux / other POSIX
         os.system('clear')
 
-def check_path() -> list:
+def check_path() -> list[object]:
 
     """
-    Check for save file path, create file if path not found.
+    Check for all semesters inside the Saves folder
     
     Returns:
         _semesters (list) -> list of semester objects
     """
 
+    try:
+        from classes import Semester
+    except ImportError:
+        from .classes import Semester
+
     _dir_path = os.path.dirname(os.path.realpath(__file__)) # this directory
     _save_dir_path = f"{_dir_path:s}\\..\\Saves" # Saves directory
-    
+
     _semesters = []
 
     for semeter_path in os.listdir(_save_dir_path):
@@ -38,7 +38,7 @@ def check_path() -> list:
 
     return _semesters
 
-def compare_time(_assignment_date : str) -> object:
+def compare_time(_assignment_date : timedelta) -> object:
 
     """
     Compare the time difference between assignment\'s dead line and current time.
@@ -50,36 +50,59 @@ def compare_time(_assignment_date : str) -> object:
         _difference (object): timedelta between the deadline and current time.
     """
 
-    _difference = _assignment_date-dt.datetime.now() # Deadline - current time.
+    _difference = _assignment_date-dt.now() # Deadline - current time.
 
     return _difference
 
-def format_timedelta(_time : object) -> str:
+def format_timedelta(_time : object) -> tuple[str, list]:
 
     """
     Format timedelta to readable string.
 
     Args:
-        _time (object): timedelta object
+        _time (datetime.timedelta): timedelta object
 
     Returns:
-        _formatted_str (str): readable string of that timedelta.
+        formatted string, info list [days, hours, minutes]
     """
 
     hour_in_day = 24
     # get day and hour by getting timedelta's days times 24 plus timedelta's seconds divided by 3600 to get total hours
     # then divided by 24 to get days and the remaining as hours.
-    day, hour = divmod(_time.days*hour_in_day + _time.seconds/3600, 24)
-    #  get hour and minute by hour times 60 and then devided again to get modded hours and the remaining as minutes.
-    hour, minute = divmod(hour*60, 60)
+    total_hours = _time.days * hour_in_day + _time.seconds / 3600.0
+    day, hour = divmod(total_hours, 24)
+    # get hour and minute
+    hour, minute = divmod(hour * 60, 60)
     _formatted_str = f"{int(day)} day/days | {int(hour)} hour/hours | {int(minute)} minute/minutes"
+    _info = [int(day), int(hour), int(minute)]
 
-    return _formatted_str
+    return (_formatted_str, _info)
+
+def deadline_report(semesters : list[object]) -> None:
+    """
+    Format deadline notice into a readable string
+
+    Returns:
+        deadlineReport (str): Formatted string deadline notice
+    """
+    textlist = []
+    for semester in semesters:
+        for subject in semester.subjects:
+            for assignment in subject.assignments:
+                if assignment.status == "Near Deadline":
+                    _, info = format_timedelta(compare_time(dt.strptime(assignment.deadline, '%m/%d/%y %H:%M:%S')))
+                    textlist.append(f"  --> Semester : {semester.season} {semester.year} | Class : {subject.name} | Name : {assignment.name}\n Remaing Time  --> Day : {info[0]} | Hour : {info[1]} | Minute : {info[2]}\n")
+    
+    if textlist:
+        print("\nAssignments that are near the deadline\n")
+        for text in textlist:
+            print(text)
+
 
 if __name__ == "__main__":
 
-    now = dt.datetime.now()
+    now = dt.now()
     time.sleep(5)
-    test = now + dt.timedelta(days=5)
+    test = now + timedelta(days=5)
     diff_time = compare_time(test)
     print(format_timedelta(diff_time))
