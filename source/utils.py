@@ -92,12 +92,11 @@ def deadline_report(semesters : list[object]) -> None:
                 if assignment.status == "Near Deadline":
                     _, info = format_timedelta(compare_time(dt.strptime(assignment.deadline, '%m/%d/%y %H:%M:%S')))
                     textlist.append(f"  --> Semester : {semester.season} {semester.year} | Class : {subject.name} | Name : {assignment.name}\n Remaing Time  --> Day : {info[0]} | Hour : {info[1]} | Minute : {info[2]}\n")
-    
+
     if textlist:
         print("\nAssignments that are near the deadline\n")
         for text in textlist:
             print(text)
-
 
 if __name__ == "__main__":
 

@@ -29,7 +29,7 @@ def main_menu() -> str:
             print(semester.show())
     # guard in case semesters is empty or check_path returned None
     gpax = calculate_gpax(semesters)
-    print(f"\nCumulative GPAX : {gpax}\n")
+    print_section(f"Cumulative GPAX : {gpax}")
     print("\nWhich option you wanted to choose?\n")
     option = input("Select Semester (1) | Add a Semester (2) | Check Deadline (3) | Quit (4)\n")
     opt = option.lower().strip()
