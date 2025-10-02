@@ -9,7 +9,7 @@ A Student Planner + GPA Tracker Project for Problem solving computer programming
 
 # Setup
 ```
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 python -m pip install -e .
 student-planner
 ```
