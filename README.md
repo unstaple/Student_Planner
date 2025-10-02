@@ -10,16 +10,14 @@ A Student Planner + GPA Tracker Project for Problem solving computer programming
 
 ## Modules
 
-pydantic==2.11.9
+pydantic v2.11.9
 
-pydantic_core==2.33.2
+pydantic_core v2.33.2
 
-setuptools-scm==9.2.0
+setuptools-scm v9.2.0
 
 ```
 python.exe -m pip install -U pip
-
-pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib gspread  <-- this is for google sheet experiments.
 
 pip install --upgrade pydantic==2.11.9, pydantic_core==2.33.2, setuptools-scm==9.2.0
 ```
