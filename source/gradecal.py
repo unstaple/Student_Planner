@@ -1,11 +1,12 @@
 # Grade calculation functions
 
+# gradecal.py
+
+from typing import Tuple
+
 def get_default_thresholds():
     """
-    Return default grade thresholds.
-    
-    Returns:
-        dict: Default grade thresholds
+    Return default grade thresholds in descending order.
     """
     return {
         'A': 80,
@@ -18,90 +19,64 @@ def get_default_thresholds():
         'F': 0
     }
 
-def get_grade_point(score):
+def get_grade_point(score: float) -> Tuple[float, str]:
     """
-    Convert raw score to grade point based on thresholds.
-    
-    Args:
-        score (float): Raw score
-        thresholds (dict): Grade thresholds {grade: min_score}
-    
-    Returns:
-        tuple: (grade_point, letter_grade)
+    Convert raw score to (grade_point, letter_grade).
+    If score is None or not a number, treat as 0 (F).
     """
+    try:
+        s = float(score)
+    except Exception:
+        s = 0.0
 
     thresholds = get_default_thresholds()
-    if score:
-        for grade, min_score in sorted(thresholds.items(), key=lambda x: x[1], reverse=True):
-            if score >= min_score:
-                grade_points = {
-                    'A': 4.0,
-                    'B+': 3.5,
-                    'B': 3.0,
-                    'C+': 2.5,
-                    'C': 2.0,
-                    'D+': 1.5,
-                    'D': 1.0,
-                    'F': 0.0
-                }
-                return grade_points[grade], grade
-        return (0.0, 'F')  # Default to F if no threshold matches
-    else:
-        return (0.0, 'F')
+    grade_points = {
+        'A': 4.0,
+        'B+': 3.5,
+        'B': 3.0,
+        'C+': 2.5,
+        'C': 2.0,
+        'D+': 1.5,
+        'D': 1.0,
+        'F': 0.0
+    }
 
+    # iterate thresholds in descending order by min_score
+    for grade, min_score in sorted(thresholds.items(), key=lambda x: x[1], reverse=True):
+        if s >= min_score:
+            return grade_points[grade], grade
+    return 0.0, 'F'
 
-def calculate_gpa(semester):
+def calculate_gpa(semester) -> float:
     """
-    Calculate GPA for a semester.
-    
-    Args:
-        semester (object): a semester object
-
-    Returns:
-        float: GPA value
+    Calculate GPA for a semester object.
     """
-
-    total_grade_points = 0
-    total_credits = 0
+    total_grade_points = 0.0
+    total_credits = 0.0
 
     for subject in semester.subjects:
-        grade_point, _ = get_grade_point(subject.score)
-        total_grade_points += grade_point * subject.credit
-        total_credits += subject.credit
+        gp, _ = get_grade_point(subject.score)
+        total_grade_points += gp * (subject.credit or 0.0)
+        total_credits += (subject.credit or 0.0)
 
     if total_credits == 0:
         return 0.0
-
     return total_grade_points / total_credits
 
-
-def calculate_gpax(all_semester):
+def calculate_gpax(all_semesters: list) -> float:
     """
-    Calculate cumulative GPAX across all semesters.
-    
-    Args:
-        all_semester (list): List of semester, each containing semester object
-    
-    Returns:
-        float: GPAX value
+    Calculate GPAX across a list of semesters.
     """
-    thresholds = get_default_thresholds()
-
-    if all_semester and thresholds:
-        total_grade_points = 0
-        total_credits = 0
-
-        for semester in all_semester:
-            for subject in semester.subjects:
-                grade_point, _ = get_grade_point(subject.score)
-                total_grade_points += grade_point * subject.credit
-                total_credits += subject.credit
-
-        if total_credits == 0:
-            return 0.0
-
-        return total_grade_points / total_credits
-
+    total_grade_points = 0.0
+    total_credits = 0.0
+    for sem in all_semesters:
+        for subject in sem.subjects:
+            gp, _ = get_grade_point(subject.score)
+            total_grade_points += gp * (subject.credit or 0.0)
+            total_credits += (subject.credit or 0.0)
+    if total_credits == 0:
+        return 0.0
+    return total_grade_points / total_credits
 
 if __name__ == "__main__":
     import os
