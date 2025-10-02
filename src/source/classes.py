@@ -10,10 +10,10 @@ try:
     from .gradecal import calculate_gpa, get_grade_point
     from .utils import compare_time, saves_dir
 except Exception:
-    from source.gradecal import calculate_gpa, get_grade_point
-    from source.utils import compare_time, saves_dir
+    from gradecal import calculate_gpa, get_grade_point
+    from utils import compare_time, saves_dir
     try:
-        from source._version import version
+        from _version import version
     except Exception:
         version = "0.0.0"
 
