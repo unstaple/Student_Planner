@@ -1,17 +1,19 @@
 # app.py
-"""Optimized non-recursive CLI for the grade-tracker project."""
 
-from source import *
+try:
+    from . import *
+except Exception:
+    from source import *
+
 from typing import Optional, Dict, List
 import time
 import os
-
 
 PRINT_SECTION_SPACES_VALUES = 0
 
 
 def print_section(section: str) -> None:
-    """Pretty-print a boxed section title."""
+    """Print a boxed section title."""
     border = "-" * (30 + len(section))
     spaces_value = " " * PRINT_SECTION_SPACES_VALUES
     middle = f"|{' ' * 14}{section}{' ' * 14}|"
@@ -51,8 +53,8 @@ def find_semester_for_subject(subject: Subject, semesters: List[Semester]) -> Op
 def main_loop():
     """Main loop that repeatedly shows the top menu."""
     while True:
-        semesters = check_path()
         clear()
+        semesters = check_path()
         print_section("Main Menu")
         if semesters:
             for s in semesters:
@@ -196,7 +198,7 @@ def semester_menu(semesters: List[Semester]) -> None:
                 time.sleep(3)
 
 def semester_selection_menu(semesters: List[Semester]) -> Optional[Semester]:
-    """Let user pick a subject inside a semester."""
+    """Let user pick a semester."""
     while True:
         clear()
         print_section("Semester Selection")
@@ -588,7 +590,7 @@ def assignment_edit_menu(assignment: Assignment, subject: Subject, semester: Sem
 
 
 def subject_edit_menu(subject: Subject, semesters: List[Semester]) -> None:
-    """Edit subject metadata (non-recursive)."""
+    """Edit subject metadata"""
     clear()
     raw = input("Edit Course Code (1) | Edit Course Name (2) | Edit Credit (3) | Back (4)\n").lower().strip()
     opt = prompt_choice(raw, {
@@ -668,4 +670,7 @@ def main():
         print("\nExiting...")
 
 if __name__ == "__main__":
+    print("Program Started...")
+    print("Saves directory:", saves_dir())
+    time.sleep(3)
     main()

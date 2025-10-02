@@ -1,29 +1,21 @@
 # Classes for the project
 
 import json
-import os
-from pathlib import Path
 from datetime import datetime as dt
 from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 try:
-    from ._version import VERSION
-except Exception:
-    try:
-        from _version import VERSION
-    except Exception:
-        VERSION = "0.0.0"
-
-try:
+    from ._version import version
     from .gradecal import calculate_gpa, get_grade_point
-except ImportError:
-    from gradecal import calculate_gpa, get_grade_point
-
-try:
-    from .utils import compare_time
-except ImportError:
-    from utils import compare_time
+    from .utils import compare_time, saves_dir
+except Exception:
+    from source.gradecal import calculate_gpa, get_grade_point
+    from source.utils import compare_time, saves_dir
+    try:
+        from source._version import version
+    except Exception:
+        version = "0.0.0"
 
 NUM_SPACES = 0
 
@@ -38,7 +30,7 @@ class Assignment(BaseModel):
     isDone: bool = False
     status: Optional[str] = None
 
-    version: str = Field(default=VERSION, exclude=True)
+    version: str = Field(default=version, exclude=True)
     model_config = ConfigDict(extra="ignore")
 
     def update_deadline_status(self) -> None:
@@ -69,7 +61,7 @@ class Assignment(BaseModel):
 
     def to_dict(self) -> dict:
         self.update_deadline_status()
-        return self.model_dump(exclude={"version"}, exclude_none=True) | {"version": VERSION}
+        return self.model_dump(exclude={"version"}, exclude_none=True) | {"version": version}
 
     def show(self) -> str:
         self.update_deadline_status()
@@ -81,7 +73,7 @@ class Subject(BaseModel):
     assignments: List[Assignment] = Field(default_factory=list)
     course_code: Optional[str] = None
 
-    version: str = Field(default=VERSION, exclude=True)
+    version: str = Field(default=version, exclude=True)
     model_config = ConfigDict(extra="ignore")
 
     @property
@@ -94,7 +86,7 @@ class Subject(BaseModel):
         return get_grade_point(self.score)
 
     def to_dict(self) -> dict:
-        return self.model_dump(exclude={"version"}, exclude_none=True) | {"version": VERSION}
+        return self.model_dump(exclude={"version"}, exclude_none=True) | {"version": version}
 
     def info(self) -> str:
         gp = get_grade_point(self.score)
@@ -116,18 +108,17 @@ class Semester(BaseModel):
     gpa: float = 0.0
     file_path: str = None
 
-    version: str = Field(default=VERSION, exclude=True)
+    version: str = Field(default=version, exclude=True)
     model_config = ConfigDict(extra="ignore")
 
     def to_dict(self) -> dict:
         self.update_gpa()
-        return self.model_dump(exclude={"version"}, exclude_none=True) | {"version": VERSION}
+        return self.model_dump(exclude={"version"}, exclude_none=True) | {"version": version}
 
     def to_json(self) -> None:
         """Save semester to Saves directory with a sensible filename."""
         self.update_gpa()
-        save_path = Path(__file__).resolve().parent.parent / "Saves"
-        save_path.mkdir(parents=True, exist_ok=True)
+        save_path = saves_dir()
         if self.year and self.season:
             self.file_path = f"{self.year}_{self.season}.json"
         else:
@@ -139,9 +130,10 @@ class Semester(BaseModel):
             json.dump(self.to_dict(), f, indent=2)
         
     def delete(self) -> None:
-        save_path = Path(__file__).resolve().parent.parent / "Saves"
-        if (save_path / self.file_path).exists():
-            os.remove(save_path / self.file_path)
+        save_path = saves_dir()
+        target = save_path / self.file_path if self.file_path else None
+        if target and target.exists():
+            target.unlink()
 
     def info(self) -> str:
         self.update_gpa()
@@ -169,8 +161,7 @@ class Semester(BaseModel):
 
 if __name__ == "__main__":
     # Save path for the semester.json file
-    save_path = os.path.dirname(os.path.realpath(__file__))
-    save_path = fr"{save_path:s}\..\Saves"
+    save_path = saves_dir()
 
     # Example assignments
     work1 = Assignment(name="work1", max_score=15, deadline="10/03/25 13:55:26")
@@ -191,11 +182,9 @@ if __name__ == "__main__":
     Summer_2025.to_json()
 
     # Load semester back from JSON
-    names = [name for name in os.listdir(save_path)]
-    for name in names:
-        with open(f"{save_path}\\{name}", "r") as f:
-            data = json.load(f)
+    for p in sorted(save_path.iterdir()):
+        if p.suffix == ".json":
+            with p.open("r", encoding="utf-8") as f:
+                data = json.load(f)
             loaded_semester = Semester.from_dict(data)
-
-            # Print loaded data
             print(loaded_semester.show())

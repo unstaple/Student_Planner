@@ -1,7 +1,5 @@
 # Grade calculation functions
 
-# gradecal.py
-
 from typing import Tuple
 
 def get_default_thresholds():

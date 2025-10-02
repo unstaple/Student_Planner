@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+from platformdirs import user_data_dir
 from datetime import datetime as dt, timedelta
 from typing import List
 
@@ -9,10 +10,17 @@ def clear() -> None:
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def saves_dir() -> Path:
-    """Return Path to Saves directory, creating it if necessary."""
-    dir = Path(__file__).resolve().parent.parent / "Saves"
-    dir.mkdir(parents=True, exist_ok=True)
-    return dir
+    """
+    Return Path to Saves directory, creating it if necessary.
+    Uses the OS user-data dir so the path is writable and stable across runs,
+    and works both when running from source and when packaged with PyInstaller.
+    """
+    appname = "Student_Planner"
+    appauthor = "Teerathap"   # optional: shows vendor folder on Windows
+    base = Path(user_data_dir(appname, appauthor))
+    save_dir = base / "Saves"
+    save_dir.mkdir(parents=True, exist_ok=True)
+    return save_dir
 
 def check_path() -> List[object]:
     """
