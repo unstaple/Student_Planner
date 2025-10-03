@@ -11,7 +11,6 @@ import os
 
 PRINT_SECTION_SPACES_VALUES = 0
 
-
 def print_section(section: str) -> None:
     """Print a boxed section title."""
     border = "-" * (30 + len(section))
@@ -159,8 +158,8 @@ def semester_menu(semesters: List[Semester]) -> None:
     # semester operations loop
     while True:
         clear()
-        print_section("Semester Menu")
-        print(current.show() +"\n")
+        print_section(current.info()[:-1])
+        print(current.show().replace(current.info(), "") +"\n")
         raw = input("Select Class (1) | Add a Class (2) | Edit Semester (3) | Back to Main Menu (4) | Quit (5)\n").lower().strip()
         opt = prompt_choice(raw, {
             "select_class": ["1", "(1)", "select class"],
@@ -382,8 +381,8 @@ def subject_menu(subject: Subject, semester: Semester, semesters: List[Semester]
     """Operations for a single subject."""
     while True:
         clear()
-        print_section("Class Menu")
-        print(subject.show() + "\n")
+        print_section(subject.info()[:-2])
+        print(subject.show().replace(subject.info(), "") + "\n")
         raw = input("Select Assignment (1) | Add Assignment (2) | Edit Class (3) | Delete Class (4) | Back to Semester Menu (5)\n").lower().strip()
         choice = prompt_choice(raw, {
             "select_assignment": ["1", "(1)", "select assignment"],
@@ -587,7 +586,6 @@ def assignment_edit_menu(assignment: Assignment, subject: Subject, semester: Sem
             case _:
                 print("Please type a proper option.")
                 time.sleep(3)
-
 
 def subject_edit_menu(subject: Subject, semesters: List[Semester]) -> None:
     """Edit subject metadata"""

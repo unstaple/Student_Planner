@@ -98,7 +98,7 @@ class Subject(BaseModel):
             for a in self.assignments:
                 out += a.show() + "\n"
         else:
-            out += "No Current Assignment\n"
+            out += f"{spaces(NUM_SPACES + 4)}No Current Assignment\n"
         return out.rstrip("\n")
 
 class Semester(BaseModel):
