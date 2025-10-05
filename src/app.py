@@ -64,31 +64,33 @@ def main_loop():
         print_section(f"Cumulative GPAX : {gpax:.2f}")
         print("\nWhich option you wanted to choose?\n")
         raw = input("Select Semester (1) | Add a Semester (2) | Check Deadline (3) | Quit (4)\n")
-        choice = prompt_choice(raw, {
+        opt = prompt_choice(raw, {
             "select_semester": ["1", "(1)", "select semester", "select"],
             "add_semester": ["2", "(2)", "add another semester", "add another", "add semester", "add"],
             "check_deadline": ["3", "(3)", "check deadline", "check"],
             "quit": ["4", "(4)", "quit", "q"]
         })
+        
+        match opt:
 
-        if choice == "select_semester":
-            semester_menu(semesters)
-        elif choice == "add_semester":
-            add_semester_flow(semesters)
-        elif choice == "check_deadline":
-            clear()
-            deadline_report(semesters)
-            sub = input("Type anything to return to Main Menu | Quit (q)\n").lower().strip()
-            if sub in ("q", "quit"):
+            case "select_semester":
+                semester_menu(semesters)
+            case "add_semester":
+                add_semester_flow(semesters)
+            case "check_deadline":
+                clear()
+                deadline_report(semesters)
+                sub = input("Type anything to return to Main Menu | Quit (q)\n").lower().strip()
+                if sub in ("q", "quit"):
+                    clear()
+                    return
+            case "quit":
                 clear()
                 return
-        elif choice == "quit":
-            clear()
-            return
-        else:
-            clear()
-            print("Please type a proper option. Returning to Main Menu in 3 seconds...")
-            time.sleep(3)
+            case _:
+                clear()
+                print("Please type a proper option. Returning to Main Menu in 3 seconds...")
+                time.sleep(3)
 
 
 # ---------------- Semester-level flows ---------------- #
@@ -121,11 +123,10 @@ def delete_semester(semester: Optional[Semester], semesters: List[Semester]) -> 
         return
     try:
         if hasattr(semester, "delete"):
-            # attempt to delete file if path exists
             try:
                 semester.delete()
             except Exception:
-                # fallback: try to remove using filename convention
+                # fallback
                 pass
         else:
             # fallback removal using filename
@@ -136,7 +137,6 @@ def delete_semester(semester: Optional[Semester], semesters: List[Semester]) -> 
             if os.path.exists(filepath):
                 os.remove(filepath)
 
-                # remove from in-memory list if found
                 if semester in semesters:
                     semesters.remove(semester)
 
@@ -181,7 +181,6 @@ def semester_menu(semesters: List[Semester]) -> None:
 
             case "edit_semester":
                 semester_edit_menu(current, semesters)
-                # if semester was deleted, return to main menu
                 if current not in check_path():
                     return
 
@@ -240,11 +239,10 @@ def semester_edit_menu(semester: Semester, semesters: List[Semester]) -> None:
             if confirm("Semester Year Editing", f"{semester.year}(Old) --> {new_year}(New)"):
                 try:
                     if hasattr(semester, "delete"):
-                    # attempt to delete file if path exists
                         try:
                             semester.delete()
                         except Exception:
-                            # fallback: try to remove using filename convention
+                            # fallback
                             pass
                     else:
                         # fallback removal using filename
@@ -278,11 +276,10 @@ def semester_edit_menu(semester: Semester, semesters: List[Semester]) -> None:
             if confirm("Semester Season Editing", f"{semester.season}(Old) --> {new_season}(New)"):
                 try:
                     if hasattr(semester, "delete"):
-                    # attempt to delete file if path exists
                         try:
                             semester.delete()
                         except Exception:
-                            # fallback: try to remove using filename convention
+                            # fallback
                             pass
                     else:
                         # fallback removal using filename
@@ -384,7 +381,7 @@ def subject_menu(subject: Subject, semester: Semester, semesters: List[Semester]
         print_section(subject.info()[:-2])
         print(subject.show().replace(subject.info(), "") + "\n")
         raw = input("Select Assignment (1) | Add Assignment (2) | Edit Class (3) | Delete Class (4) | Back to Semester Menu (5)\n").lower().strip()
-        choice = prompt_choice(raw, {
+        opt = prompt_choice(raw, {
             "select_assignment": ["1", "(1)", "select assignment"],
             "add_assignment": ["2", "(2)", "add assignment"],
             "edit_class": ["3", "(3)", "edit class"],
@@ -392,7 +389,7 @@ def subject_menu(subject: Subject, semester: Semester, semesters: List[Semester]
             "back": ["5", "(5)", "back", "b"]
         })
         
-        match choice:
+        match opt:
 
             case "select_assignment":
                 if not subject.assignments:
@@ -462,8 +459,8 @@ def assignment_adding_menu(subject: Subject, semester: Semester) -> None:
         time.sleep(3)
         return
 
-    print("Input deadline in format : MM/DD/YY HH:MM:SS (e.g. 10/03/25 13:55:26). Leave blank for no deadline.")
-    deadline = input("Deadline: ").strip() or None
+    print("Input deadline in format : Month/Day/Year Hour:Minute (e.g. 04/24/25 13:55). Leave blank for no deadline.")
+    deadline = f'{input("Deadline: ").strip()}:00' or None
 
     try:
         new_assign = Assignment(name=name, max_score=max_score, deadline=deadline)
@@ -482,18 +479,17 @@ def assignment_edit_menu(assignment: Assignment, subject: Subject, semester: Sem
         clear()
         print_section("Assignment Menu")
         print(assignment.show())
-        raw = input("Edit Name (1) | Edit Max Score (2) | Edit Current Score (3) | Edit Deadline (4) | Toggle Done (5) | Delete Assignment (6) | Back (7) | Return to Main Menu (8) | Quit (9)\n").lower().strip()
-        opt = choice = prompt_choice(raw, {
+        raw = input("Edit Name (1) | Edit Current Score (2) | Edit Max Score (3) | Edit Deadline (4) | Toggle Done (5) | Delete Assignment (6) | Back (7) | Quit (8)\n").lower().strip()
+        opt = prompt_choice(raw, {
             "edit_name": ["1", "(1)", "edit name"],
-            "edit_max_score": ["2", "(2)", "edit max score"],
-            "edit_current_score": ["3", "(3)", "edit current score"],
+            "edit_current_score": ["2", "(2)", "edit current score"],
+            "edit_max_score": ["3", "(3)", "edit max score"],
             "edit_deadline": ["4", "(4)", "edit deadline"],
             "toggle_done": ["5", "(5)", "toggle done"],
             "delete_assignment": ["6", "(6)", "delete assignment"],
             "back": ["7", "(7)", "back", "b"],
             "quit": ["8", "(8)", "quit", "q"],
         })
-        
         
         match opt:
             case "edit_name":
@@ -502,6 +498,22 @@ def assignment_edit_menu(assignment: Assignment, subject: Subject, semester: Sem
                     assignment.name = new_name
                     semester.to_json()
                     print("Successfully changed the assignment name.")
+                else:
+                    print("Canceled.")
+                time.sleep(3)
+                
+            case "edit_current_score":
+                try:
+                    new_score = float(input("Please enter current score (use exact number):\n").strip())
+                except ValueError:
+                    print("Invalid number.")
+                    time.sleep(3)
+                    continue
+                if confirm("Assignment Current Score Editing", f"{assignment.current_score}(Old) --> {new_score}(New)"):
+                    assignment.current_score = new_score
+                    assignment.isDone = True
+                    semester.to_json()
+                    print("Successfully changed the current score and marked as done.")
                 else:
                     print("Canceled.")
                 time.sleep(3)
@@ -517,22 +529,6 @@ def assignment_edit_menu(assignment: Assignment, subject: Subject, semester: Sem
                     assignment.max_score = new_max
                     semester.to_json()
                     print("Successfully changed the max score.")
-                else:
-                    print("Canceled.")
-                time.sleep(3)
-
-            case "edit_current_score":
-                try:
-                    new_score = float(input("Please enter current score (use exact number):\n").strip())
-                except ValueError:
-                    print("Invalid number.")
-                    time.sleep(3)
-                    continue
-                if confirm("Assignment Current Score Editing", f"{assignment.current_score}(Old) --> {new_score}(New)"):
-                    assignment.current_score = new_score
-                    assignment.isDone = True
-                    semester.to_json()
-                    print("Successfully changed the current score and marked as done.")
                 else:
                     print("Canceled.")
                 time.sleep(3)
@@ -598,7 +594,6 @@ def subject_edit_menu(subject: Subject, semesters: List[Semester]) -> None:
         "back": ["4", "(4)", "back", "b"],
         "quit": ["5", "(5)", "quit", "q"]
         })
-    
 
     match opt:
         case "edit_course_code":
