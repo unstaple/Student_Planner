@@ -81,7 +81,7 @@ def deadline_report(semesters: List[object]) -> None:
     for semester in semesters:
         for subject in semester.subjects:
             for assignment in subject.assignments:
-                if not assignment.deadline:
+                if not assignment.deadline or assignment.status == "Done":
                     continue
                 try:
                     deadline_dt = dt.strptime(assignment.deadline, "%m/%d/%y %H:%M:%S")

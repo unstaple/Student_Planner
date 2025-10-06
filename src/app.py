@@ -460,7 +460,9 @@ def assignment_adding_menu(subject: Subject, semester: Semester) -> None:
         return
 
     print("Input deadline in format : Month/Day/Year Hour:Minute (e.g. 04/24/25 13:55). Leave blank for no deadline.")
-    deadline = f'{input("Deadline: ").strip()}:00' or None
+    deadline = input("Deadline: ").strip() or None
+    if deadline:
+        deadline += ":00"
 
     try:
         new_assign = Assignment(name=name, max_score=max_score, deadline=deadline)
